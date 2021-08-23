@@ -25,7 +25,7 @@ WebServer server(80);
 WiFiClientSecure client;
 
 const char* host = "notify-api.line.me";
-const char* token = "2rRmUh3UWcoeVFlCon7maRX7DRwksquW53aqrcRrf4C";
+const char* token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 IPAddress ipadr;
 
 int Voltage, ActivePower = 0;
