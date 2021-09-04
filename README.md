@@ -32,4 +32,5 @@ Send 3D PRINTING "Completion Notice" to LINE Notify.
 https://ambidata.io/
 ![Ambient](img/ambient.png)
 
-
+### Finish 3D Printing
+![Finish Message](img/CompleteNotify.jpg)
