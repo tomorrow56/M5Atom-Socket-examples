@@ -16,3 +16,20 @@ https://qiita.com/mine820/items/53c2a833937f1186539f
 ### LINE Notify message
 ![LINE message](img/LINE_Notify.jpg)
 
+## M5Atom_Socket_LineNotify_Ambient
+Send 3D PRINTING "Completion Notice" to LINE Notify.
+
+### System
+![SYSTEM](img/system.PNG)
+
+### Create LINE Group
+![LINE Group](img/LineGroup.jpg)
+
+### IP Address notification Message
+![IP Address](img/IPAddress.jpg)
+
+### Power Trend using ambient
+https://ambidata.io/
+![Ambient](img/ambient.png)
+
+
