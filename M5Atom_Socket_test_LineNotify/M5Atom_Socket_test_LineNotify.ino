@@ -54,6 +54,8 @@ String DataCreate() {
 }
 
 void setup(){
+  client.setInsecure();
+	
   //M5::begin(SerialEnable = true, I2CEnable = true, DisplayEnable = false);
   M5.begin(true, false, true);
   M5.dis.drawpix(0, 0xe0ffff);
