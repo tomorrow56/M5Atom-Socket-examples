@@ -60,8 +60,19 @@ const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // 
 
 ### Optional Configuration
 
-- To use Ambient, uncomment `useAmb` and set your channel ID and write key.
-- To enable/disable debug mode, change the value of `debug`.
+- **Data Transmission to Ambient:**
+  - Enable the feature by uncommenting `//#define useAmb` at the beginning of `M5Atom_Socket_LineMessagingAPI.ino`.
+  - Set your own `channelId` and `writeKey`.
+    ```cpp
+    #ifdef useAmb
+      #include <Ambient.h>
+      Ambient ambient;
+      unsigned int channelId = 40780; // Your Ambient channel ID
+      const char* writeKey = "<YOUR_Ambient_WRITE_KEY>"; // Your Ambient write key
+    #endif
+    ```
+- **Debug Mode:**
+  - Change the value of `debug` to `true` or `false` to enable/disable debug output to the serial console.
 
 ## Usage
 

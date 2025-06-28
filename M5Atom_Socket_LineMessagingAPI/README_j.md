@@ -60,8 +60,19 @@ const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // 
 
 ### オプション設定
 
-- Ambientを使用する場合は、`useAmb` のコメントを外し、チャンネルIDとライトキーを設定します
-- デバッグモードの有効/無効を切り替えるには `debug` を変更します
+- **Ambientへのデータ送信:**
+  - `M5Atom_Socket_LineMessagingAPI.ino` の先頭にある `//#define useAmb` のコメントを外して機能を有効にします。
+  - `channelId` と `writeKey` をご自身のものに設定してください。
+    ```cpp
+    #ifdef useAmb
+      #include <Ambient.h>
+      Ambient ambient;
+      unsigned int channelId = 40780; // ご自身のAmbientチャンネルID
+      const char* writeKey = "<YOUR_Ambient_WRITE_KEY>"; // ご自身のAmbientライトキー
+    #endif
+    ```
+- **デバッグモード:**
+  - `debug` の値を `true` または `false` に変更して、シリアルコンソールへのデバッグ出力の有効/無効を切り替えます。
 
 ## 使用方法
 
