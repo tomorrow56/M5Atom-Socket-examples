@@ -56,7 +56,7 @@ IPAddress ipadr;
 
 // 以下からLINEチャネルアクセストークンを取得する
 // https://developers.line.biz/ja/
-const char* accessToken = "Ic97jzbsua+ymcuu44DTb0+4w1yb3kYVEi9eBKC1+qskV+V+KzNbFl4a4+Qr5pnqqAtZLspbyQfJ7mh2+xlFK/IZEHKx6LzcGo5zHXxigK7SNUTYeQJBlU5ZLPix+h1k/X857vPK18TKNHD+twVK2wdB04t89/1O/w1cDnyilFU="; // LINEチャネルアクセストークン
+const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>"; // LINEチャネルアクセストークン
 
 // ライブラリインスタンス作成
 ESP32LineMessenger line;
