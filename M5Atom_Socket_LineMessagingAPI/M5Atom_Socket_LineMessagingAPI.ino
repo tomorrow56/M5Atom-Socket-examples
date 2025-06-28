@@ -10,17 +10,14 @@
 /*
  * Description: Use ATOM Socket to monitor the socket power, press the middle button of ATOM to switch the socket power on and off.
  * Connect to Wi-Fi router and access IP address to wirelessly control the socket power and view the power voltage, current and power information.
- * Send IP address of device to LINE Notify.
- * The following article was used as a reference.
- * https://qiita.com/mine820/items/53c2a833937f1186539f
- * https://qiita.com/tomorrow56/items/2049eea1f68b9c1fd471
+ * Send IP address of device to LINE Messaging API.
+ * Please see README.md for reference.
 */
 
 /*
  * Device configuration
 */
-//#define DEVICE_NAME "M5Atom Socket"  // デバイス名を設定
-#define DEVICE_NAME "Fraxinus"
+#define DEVICE_NAME "M5Atom Socket"  // デバイス名を設定
 // デバッグモード設定
 #define debug true
 // If you want to use ambient,
@@ -33,7 +30,7 @@
   #include <Ambient.h>
   Ambient ambient;
   unsigned int channelId = 40780; // Ambient channel ID
-  const char* writeKey = "ed2ee1286bfeed07"; // write key
+  const char* writeKey = "<YOUR_ambient_WRITE_KEY>"; // write key
 #endif
 
 uint16_t SendInterval = 1 * 60 * 1000;
