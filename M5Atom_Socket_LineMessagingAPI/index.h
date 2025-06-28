@@ -126,6 +126,44 @@ body {
   cursor: not-allowed;
 }
 
+.button-section {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.ota-button {
+  background-color: #0984e3;
+  color: white;
+}
+
+.clear-wifi-button {
+  background-color: #e17055;
+  color: white;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 480px) {
   .device-info {
     width: 90%;
@@ -139,6 +177,15 @@ body {
   
   .measurement-line {
     grid-template-columns: 70px 1fr 20px;
+  }
+  
+  .button-section {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-button {
+    width: 100%;
   }
 }
 </style>
@@ -171,6 +218,10 @@ body {
   <div class="status-section">
     <span class="status-label">STATUS</span>
     <button id="powerButton" class="power-button on" onclick="togglePower()">ON</button>
+  </div>
+  
+  <div class="button-section">
+    <button class="action-button ota-button" onclick="navigateToOTA()">OTA Update</button>
   </div>
 </div>
 
@@ -284,10 +335,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function navigateToOTA() {
   window.location.href = '/update';
 }
+
 </script>
-<div style="margin-top: 20px;">
-  <button class="power-button on" onclick="navigateToOTA()">OTA Update</button>
-</div>
 </body>
 </html>
 )=====";

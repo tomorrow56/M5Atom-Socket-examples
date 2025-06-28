@@ -5,6 +5,7 @@
 #include <WiFiClientSecure.h>
 #include "index.h"
 #include <ESP32LineMessenger.h>
+#include "WiFiManager.h"
 
 /*
  * Description: Use ATOM Socket to monitor the socket power, press the middle button of ATOM to switch the socket power on and off.
@@ -18,7 +19,8 @@
 /*
  * Device configuration
 */
-#define DEVICE_NAME "M5Atom Socket"  // デバイス名を設定
+//#define DEVICE_NAME "M5Atom Socket"  // デバイス名を設定
+#define DEVICE_NAME "Fraxinus"
 // デバッグモード設定
 #define debug true
 // If you want to use ambient,
@@ -30,8 +32,8 @@
 #ifdef useAmb
   #include <Ambient.h>
   Ambient ambient;
-  unsigned int channelId = 12345; // Ambient channel ID
-  const char* writeKey = "<YOUR_AMBIENT_CH_WRITEKEY>"; // write key
+  unsigned int channelId = 40780; // Ambient channel ID
+  const char* writeKey = "ed2ee1286bfeed07"; // write key
 #endif
 
 uint16_t SendInterval = 1 * 60 * 1000;
@@ -54,7 +56,7 @@ IPAddress ipadr;
 
 // 以下からLINEチャネルアクセストークンを取得する
 // https://developers.line.biz/ja/
-const char* accessToken = "<YOUR_LINE_NOTIFY_TOKEN>"; // LINEチャネルアクセストークン
+const char* accessToken = "Ic97jzbsua+ymcuu44DTb0+4w1yb3kYVEi9eBKC1+qskV+V+KzNbFl4a4+Qr5pnqqAtZLspbyQfJ7mh2+xlFK/IZEHKx6LzcGo5zHXxigK7SNUTYeQJBlU5ZLPix+h1k/X857vPK18TKNHD+twVK2wdB04t89/1O/w1cDnyilFU="; // LINEチャネルアクセストークン
 
 // ライブラリインスタンス作成
 ESP32LineMessenger line;
@@ -79,6 +81,13 @@ uint32_t updateTime = 0; // time for next update
 */
 float CurrentPre = 0;
 float CurrentTH = 0.3;
+
+/*
+ * for Long press
+*/
+unsigned long buttonPressStartTime = 0;
+const unsigned long longPressDuration = 5000; // 5 seconds
+bool longPressTriggered = false;
 
 void handleRoot() {
   String htmlWithDeviceName = String(html);
@@ -263,11 +272,46 @@ void loop(){
     }
   }
 
-  // 物理ボタンでのON/OFF制御
-  if(M5.Btn.wasPressed()){
-    RelayFlag = !RelayFlag;
-    Serial.print("Button: Power ");
-    Serial.println(RelayFlag ? "ON" : "OFF");
+  // 物理ボタンでのON/OFF制御 (短押し/長押し)
+  if (M5.Btn.isPressed()) {
+    if (buttonPressStartTime == 0) {
+      // ボタンが押された瞬間
+      buttonPressStartTime = millis();
+      longPressTriggered = false;
+    } else if (millis() - buttonPressStartTime > longPressDuration) {
+      if (!longPressTriggered) {
+        longPressTriggered = true;
+        Serial.println("Long press detected. Starting WiFi Manager AP.");
+        M5.dis.drawpix(0, 0x0000ff); // 青色でAPモード中を表示
+
+        // メインのWebサーバーを停止してポートの競合を防ぐ
+        server.stop();
+
+        WiFiManager wifiManager;
+        wifiManager.setDebugOutput(true);
+        wifiManager.setConfigPortalTimeout(180); // 3分でタイムアウト
+
+        if (wifiManager.startConfigPortal(WiFiAPname)) {
+          Serial.println("WiFi settings configured successfully.");
+        } else {
+          Serial.println("Failed to configure WiFi or timed out.");
+        }
+        
+        Serial.println("Restarting device...");
+        delay(1000);
+        ESP.restart();
+      }
+    }
+  } else {
+    // ボタンが離されている
+    if (buttonPressStartTime > 0 && !longPressTriggered) {
+      // 短押しとして処理
+      RelayFlag = !RelayFlag;
+      Serial.print("Button: Power ");
+      Serial.println(RelayFlag ? "ON" : "OFF");
+    }
+    // 状態をリセット
+    buttonPressStartTime = 0;
   }
 
   // リレー制御とLED表示
