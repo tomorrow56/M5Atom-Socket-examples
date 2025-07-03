@@ -11,7 +11,7 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 ### Web UI
 
-<img src="img/WebUI.jpeg" width="320" align = "middle">
+<img src="img/WebUI.jpeg" width="320" align = "center">
 
 ### OTA Update by Elagant OTA
 
