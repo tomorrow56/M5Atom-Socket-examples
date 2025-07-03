@@ -6,212 +6,362 @@ const char html[] = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>M5Atom Socket</title>
 <style>
-body {
+* {
   margin: 0;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0c1426 0%, #1a2332 50%, #0f1b2e 100%);
+  color: white;
   min-height: 100vh;
-}
-
-.container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-}
-
-.device-info {
-  background-color: #ffeaa7;
-  border: 2px solid #ddd;
-  border-radius: 15px;
+  justify-content: center;
   padding: 20px;
-  width: 300px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-.device-name {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #2d3436;
-}
-
-.info-line {
-  margin: 8px 0;
-  font-size: 16px;
-  color: #2d3436;
+.main-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  gap: 40px;
+  max-width: 900px;
+  width: 100%;
 }
 
-.info-line.ip {
-  justify-content: flex-start;
-  gap: 10px;
-}
-
-.measurement-line {
-  margin: 8px 0;
-  font-size: 16px;
-  color: #2d3436;
-  display: grid;
-  grid-template-columns: 80px 1fr 20px;
-  align-items: center;
-}
-
-.label {
-  text-align: left;
-}
-
-.value {
-  font-weight: bold;
-  text-align: right;
-}
-
-.unit {
-  text-align: left;
-  margin-left: 5px;
-}
-
-.status-section {
-  margin-top: 10px;
+.measurements-container {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 60px;
   justify-content: center;
 }
 
+.left-measurements {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.measurement-item {
+  position: relative;
+  width: 280px;
+}
+
+.measurement-label {
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #64b5f6;
+  margin-bottom: 8px;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.measurement-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: center;
+}
+
+.measurement-value {
+  font-size: 4rem;
+  font-weight: 300;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
+}
+
+.measurement-unit {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #64b5f6;
+}
+
+.voltage-line {
+  height: 3px;
+  background: linear-gradient(90deg, #00bcd4 0%, #64b5f6 100%);
+  margin-top: 15px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+}
+
+.current-line {
+  height: 3px;
+  background: linear-gradient(90deg, #00bcd4 0%, #64b5f6 100%);
+  margin-top: 15px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+}
+
+.power-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.power-circle {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-outer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #00bcd4 0%, #64b5f6 100%);
+  padding: 3px;
+}
+
+.circle-middle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a2332 0%, #0c1426 100%);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #00bcd4 0%, #64b5f6 100%);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-content {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a2332 0%, #0c1426 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.power-value {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
+}
+
+.power-unit {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #64b5f6;
+  margin-top: 3px;
+}
+
+.status-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
 .status-label {
-  font-size: 18px;
-  font-weight: bold;
-  color: #2d3436;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: #64b5f6;
+  opacity: 0.8;
 }
 
 .power-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border: 2px solid #00bcd4;
+  border-radius: 25px;
+  background: transparent;
+  color: #00bcd4;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   min-width: 80px;
 }
 
 .power-button.on {
-  background-color: #00b894;
+  background: linear-gradient(135deg, #00bcd4 0%, #64b5f6 100%);
   color: white;
+  box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
 }
 
 .power-button.off {
-  background-color: #636e72;
-  color: white;
+  background: transparent;
+  color: #636e72;
+  border-color: #636e72;
 }
 
 .power-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 20px rgba(0, 188, 212, 0.6);
 }
 
-.power-button:active {
-  transform: translateY(0);
-}
-
-.loading {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.button-section {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.action-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
+.device-info {
+  position: absolute;
+  top: 30px;
+  left: 30px;
   font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 120px;
+  color: #64b5f6;
+  opacity: 0.7;
+}
+
+.device-info #deviceName {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.glow-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(100, 181, 246, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+.ota-section {
+  margin-top: 30px;
 }
 
 .ota-button {
-  background-color: #0984e3;
-  color: white;
+  padding: 8px 16px;
+  border: 1px solid #64b5f6;
+  border-radius: 20px;
+  background: transparent;
+  color: #64b5f6;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.clear-wifi-button {
-  background-color: #e17055;
-  color: white;
+.ota-button:hover {
+  background: rgba(100, 181, 246, 0.1);
+  transform: translateY(-1px);
 }
 
-.action-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.action-button:active {
-  transform: translateY(0);
-}
-
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .measurements-container {
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+  
+  .measurement-item {
+    width: 250px;
+    text-align: center;
+  }
+  
+  .measurement-value {
+    font-size: 3rem;
+  }
+  
+  .power-circle {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .power-value {
+    font-size: 1.8rem;
+  }
+  
+  .power-unit {
+    font-size: 1.8rem;
+  }
+  
   .device-info {
-    width: 90%;
-    margin: 10px;
-  }
-  
-  .status-section {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .measurement-line {
-    grid-template-columns: 70px 1fr 20px;
-  }
-  
-  .button-section {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .action-button {
-    width: 100%;
+    position: relative;
+    top: auto;
+    left: auto;
+    text-align: center;
+    margin-bottom: 20px;
   }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="device-info">
-    <div class="device-name" id="deviceName">%DEVICE_NAME%</div>
-    <div class="info-line ip">
-      <span>IP adrs:</span>
-      <span class="value" id="ipAddress">取得中...</span>
+<div class="glow-effect"></div>
+
+<div class="device-info">
+  <div id="deviceName">%DEVICE_NAME%</div>
+  <div>IP: <span id="ipAddress">取得中...</span></div>
+</div>
+
+<div class="main-container">
+  <div class="measurements-container">
+    <div class="left-measurements">
+      <div class="measurement-item">
+        <div class="measurement-label">VOLTAGE</div>
+        <div class="measurement-display">
+          <div class="measurement-value" id="voltage">--</div>
+          <span class="measurement-unit">V</span>
+        </div>
+        <div class="voltage-line"></div>
+      </div>
+      
+      <div class="measurement-item">
+        <div class="measurement-label">CURRENT</div>
+        <div class="measurement-display">
+          <div class="measurement-value" id="current">--</div>
+          <span class="measurement-unit">A</span>
+        </div>
+        <div class="current-line"></div>
+      </div>
     </div>
-    <div class="measurement-line">
-      <span class="label">Voltage:</span>
-      <span class="value" id="voltage">--</span>
-      <span class="unit">V</span>
-    </div>
-    <div class="measurement-line">
-      <span class="label">Current:</span>
-      <span class="value" id="current">--</span>
-      <span class="unit">A</span>
-    </div>
-    <div class="measurement-line">
-      <span class="label">Power:</span>
-      <span class="value" id="power">--</span>
-      <span class="unit">W</span>
+    
+    <div class="power-section">
+      <div class="power-circle">
+        <div class="circle-outer">
+          <div class="circle-middle">
+            <div class="circle-inner">
+              <div class="circle-content">
+                <div class="power-value" id="power">--</div>
+                <div class="power-unit">W</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -220,8 +370,8 @@ body {
     <button id="powerButton" class="power-button on" onclick="togglePower()">ON</button>
   </div>
   
-  <div class="button-section">
-    <button class="action-button ota-button" onclick="navigateToOTA()">OTA Update</button>
+  <div class="ota-section">
+    <button class="ota-button" onclick="navigateToOTA()">OTA Update</button>
   </div>
 </div>
 
@@ -264,9 +414,11 @@ function updateButtonState() {
   }
   
   if (isLoading) {
-    button.classList.add('loading');
+    button.style.opacity = '0.6';
+    button.style.cursor = 'not-allowed';
   } else {
-    button.classList.remove('loading');
+    button.style.opacity = '1';
+    button.style.cursor = 'pointer';
   }
 }
 
