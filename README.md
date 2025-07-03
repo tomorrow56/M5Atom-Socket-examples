@@ -11,7 +11,7 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 ### Web UI
 
-![Web Contorol Interface](img/WebUI.jpeg)
+<img src="img/WebUI.jpeg" width="320">
 
 ### connect to Wi-Fi
 
