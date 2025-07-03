@@ -11,21 +11,18 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 ### Web UI
 
-<img src="img/WebUI.jpeg" width="320">
-
-### connect to Wi-Fi
-
-![connect to Wi-Fi router](img/ATOM-Wifi.png)
+<img src="img/WebUI.jpeg" width="320" align = center>
 
 ### OTA Update by Elagant OTA
 
-![OTA connection](img/OTA_update.png)
+<img src="img/OTA_update.png" width="320" align = center>
 
 ### IP Address notification Message
 
-![LINE message](img/LineMessage.jpg)
+<img src="img/LineMessage.jpg" width="160" align = center>
 
 ### Power Trend using ambient
 
 https://ambidata.io/
-![Ambient](img/ambient.png)
+
+<img src="img/ambient.png" width="320" align = center>
