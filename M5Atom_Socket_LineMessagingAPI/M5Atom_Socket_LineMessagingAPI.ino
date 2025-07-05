@@ -6,6 +6,9 @@
 #include "index.h"
 #include <ESP32LineMessenger.h>
 #include "WiFiManager.h"
+#include <Preferences.h>
+
+Preferences preferences;
 
 /*
  * Description: Use ATOM Socket to monitor the socket power, press the middle button of ATOM to switch the socket power on and off.
@@ -29,8 +32,8 @@
 #ifdef useAmb
   #include <Ambient.h>
   Ambient ambient;
-  unsigned int channelId = 40780; // Ambient channel ID
-  const char* writeKey = "<YOUR_ambient_WRITE_KEY>"; // write key
+  unsigned int channelId = 12345; // Ambient channel ID
+  const char* writeKey = "<ambient_key>"; // write key
 #endif
 
 uint16_t SendInterval = 1 * 60 * 1000;
@@ -47,13 +50,10 @@ WiFiClientSecure client; // client for LINE Notify
 WiFiClient client2; // client for ambient
 IPAddress ipadr;
 
-/*
- * LINE Messaging API information
-*/
 
 // 以下からLINEチャネルアクセストークンを取得する
 // https://developers.line.biz/ja/
-const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>"; // LINEチャネルアクセストークン
+const char* accessToken = "<LINE_access_token>"; // LINEチャネルアクセストークン
 
 // ライブラリインスタンス作成
 ESP32LineMessenger line;
@@ -150,16 +150,23 @@ void setup(){
   M5.dis.drawpix(0, 0xe0ffff);
   ATOM.Init(AtomSerial, RELAY, RXD);
 
-  // アクセストークン設定
-  line.setAccessToken(accessToken);
-  
-  // デバッグモード設定（オプション）
-  line.setDebug(debug);
-
   // Wifi and OTA setup
   uint64_t Chipid = GetChipid();
   sprintf(WiFiAPname, "%s%04X", WiFiAPPrefix, (uint16_t)Chipid);
   WiFiMgrSetup(WiFiAPname);
+  
+  // アクセストークン設定 (after WiFi is connected)
+  String storedApiKey = loadLineApiKey();
+  if (storedApiKey.length() > 0) {
+    line.setAccessToken(storedApiKey.c_str());
+    Serial.println("LINE API Key loaded from NVS.");
+  } else {
+    line.setAccessToken(accessToken);
+    Serial.println("Using default LINE API Key.");
+  }
+  
+  // デバッグモード設定（オプション）
+  line.setDebug(debug);
   Serial.println("connected to router(^^)");
   Serial.print("AP SSID: ");
   Serial.println(WiFi.SSID());
@@ -194,6 +201,8 @@ void setup(){
   server.on("/data", []() {
     server.send(200, "text/plain", DataCreate());
   });
+  server.on("/apikey", handleApiKey);
+  server.on("/clearapikey", handleClearApiKey);
   
   // CORS対応
   server.enableCORS(true);
@@ -285,11 +294,23 @@ void loop(){
         server.stop();
 
         WiFiManager wifiManager;
+        // Increased buffer size to 200 to accommodate full LINE API key length
+        WiFiManagerParameter custom_line_api_key("lineapikey", "LINE Messaging API Key", "", 200);
+        wifiManager.addParameter(&custom_line_api_key);
         wifiManager.setDebugOutput(true);
         wifiManager.setConfigPortalTimeout(180); // 3分でタイムアウト
 
         if (wifiManager.startConfigPortal(WiFiAPname)) {
           Serial.println("WiFi settings configured successfully.");
+          // Retrieve the custom parameter value
+          String lineApiKey = custom_line_api_key.getValue();
+          if (lineApiKey.length() > 0) {
+            saveLineApiKey(lineApiKey);
+            Serial.print("LINE API Key: ");
+            Serial.println(lineApiKey);
+          } else {
+            Serial.println("No LINE API Key entered.");
+          }
         } else {
           Serial.println("Failed to configure WiFi or timed out.");
         }
@@ -324,4 +345,56 @@ void loop(){
   server.handleClient();
   ElegantOTA.loop();
 }
+
+
+
+void saveLineApiKey(String apiKey) {
+  preferences.begin("line-api", false);
+  preferences.putString("api_key", apiKey);
+  preferences.end();
+  Serial.println("LINE API Key saved to NVS.");
+}
+
+
+
+
+String loadLineApiKey() {
+  preferences.begin("line-api", false);
+  String apiKey = preferences.getString("api_key", "");
+  preferences.end();
+  return apiKey;
+}
+
+
+
+
+void clearLineApiKey() {
+  preferences.begin("line-api", false);
+  preferences.remove("api_key");
+  preferences.end();
+  Serial.println("LINE API Key cleared from NVS.");
+}
+
+
+
+
+void handleApiKey() {
+  String apiKey = loadLineApiKey();
+  String response = "";
+  if (apiKey.length() > 0) {
+    response = "LINE API Key: " + apiKey + "<br>";
+    response += "<a href=\"/clearapikey\">Clear LINE API Key</a>";
+  } else {
+    response = "No LINE API Key saved.<br>";
+  }
+  server.send(200, "text/html", response);
+}
+
+void handleClearApiKey() {
+  clearLineApiKey();
+  server.send(200, "text/plain", "LINE API Key cleared. Please restart the device.");
+  delay(1000);
+  ESP.restart();
+}
+
 

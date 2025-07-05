@@ -1,34 +1,24 @@
 # M5Atom Socket with LINE Messaging API
-This is a smart plug project using the M5Atom Socket. It features power ON/OFF control, power consumption monitoring, LINE notifications, and data transmission to Ambient.
+A smart socket project using M5Atom Socket. Features power ON/OFF control, power consumption monitoring, LINE notifications, and data transmission to Ambient.
 
-## Main Features
+## Key Features
 
-- **Power Control:**
-  - Remote ON/OFF via Web UI
-  - ON/OFF via the physical button (short press)
-- **Power Monitoring:**
-  - Real-time display of voltage, current, and power on the Web UI
-- **Notification Features:**
-  - Sends IP address to LINE on startup
-  - Sends a completion notification to LINE when power consumption drops below a threshold (intended for uses like 3D printers)
-- **WiFi Configuration:**
-  - Automatically starts a configuration access point on first boot
-  - Enter WiFi configuration mode anytime by long-pressing the physical button (5+ seconds)
-- **Data Transmission:**
-  - Data transmission to Ambient (optional)
-- **Firmware Update:**
-  - Update from the Web UI via OTA (Over-The-Air)
+- Remote control via web interface
+- Real-time power consumption monitoring (voltage, current, power)
+- LINE Messaging API notifications when power consumption falls below set threshold
+- Data transmission to Ambient (optional)
+- OTA (Over-The-Air) update support
 
 ## Hardware Requirements
 
 - M5Atom
 - M5Atom Socket
-- Wi-Fi connection environment
+- Wi-Fi connection
 
 ## Software Requirements
 
 - Arduino IDE
-- The following libraries:
+- Required libraries:
   - M5Atom
   - ElegantOTA
   - ESP32LineMessenger
@@ -38,83 +28,84 @@ This is a smart plug project using the M5Atom Socket. It features power ON/OFF c
 
 ## Installation
 
-1. Clone the repository or download the source code.
-2. Open `M5Atom_Socket_LineMessagingAPI.ino` in the Arduino IDE.
-3. Install the required libraries.
-4. Customize the settings (see below).
-5. Upload the sketch to the M5Atom.
+1. Clone the repository or download the source code
+2. Open `M5Atom_Socket_LineAPI_Ambient.ino` in Arduino IDE
+3. Install the required libraries
+4. Customize the settings (see below)
+5. Upload the sketch to your M5Atom
 
 ## Configuration
 
-### Required Configuration
+### API Key Management
 
-Open `M5Atom_Socket_LineMessagingAPI.ino` and configure the following:
+#### How to Check Current API Key
+
+1. Access `http://[device-ip-address]/apikey` in your browser
+2. The currently saved API key will be displayed
+
+#### How to Clear API Key
+
+1. Access `http://[device-ip-address]/clearapikey` in your browser
+2. The device will automatically restart
+3. After restart, set a new API key
+
+### Required Settings
+
+Open `M5Atom_Socket_LineAPI_Ambient.ino` and configure the following settings:
 
 ```cpp
-// Device Name
-#define DEVICE_NAME "Fraxinus"  // Can be changed to any device name
+// Device name
+#define DEVICE_NAME "M5Atom Socket"  // Change to your preferred device name
 
-// LINE Messaging API Access Token
-const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // Replace with your actual token
+// LINE Notify Access Token
+const char* accessToken = "<YOUR_LINE_NOTIFY_TOKEN>";  // Replace with your actual token
 ```
 
-### Optional Configuration
+### Optional Settings
 
-- **Data Transmission to Ambient:**
-  - Enable the feature by uncommenting `//#define useAmb` at the beginning of `M5Atom_Socket_LineMessagingAPI.ino`.
-  - Set your own `channelId` and `writeKey`.
-    ```cpp
-    #ifdef useAmb
-      #include <Ambient.h>
-      Ambient ambient;
-      unsigned int channelId = 40780; // Your Ambient channel ID
-      const char* writeKey = "<YOUR_Ambient_WRITE_KEY>"; // Your Ambient write key
-    #endif
-    ```
-- **Debug Mode:**
-  - Change the value of `debug` to `true` or `false` to enable/disable debug output to the serial console.
+- To use Ambient, uncomment `useAmb` and set your channel ID and write key
+- Toggle debug mode by modifying the `debug` variable
 
 ## Usage
 
-### 1. WiFi Setup (First time or when changing networks)
-- When powered on, the M5Atom will attempt to connect to the saved WiFi network.
-- If it cannot connect, or if the physical button is long-pressed for 5+ seconds, it will enter WiFi configuration mode.
-- The M5Atom's LED will turn **blue**, and an access point named `ATOM-SOCKET-XXXX` will start.
-- Connect to this access point with a smartphone or PC, and navigate to `192.168.4.1` in a web browser to configure the SSID and password for your WiFi network.
-- After configuration, the device will automatically restart.
-
-### 2. Normal Operation
-- After connecting to WiFi, a startup notification with the IP address will be sent to LINE.
-- A **short press** of the physical button toggles the socket's power.
-  - ON: Red LED
-  - OFF: Green LED
-- Access the device's IP address in a web browser to see the Web UI.
-
-### 3. Web UI Operations
-- Power ON/OFF
-- Real-time monitoring of power consumption (voltage, current, power)
-- Firmware updates via OTA (Over-the-Air)
+1. Power on the M5Atom to connect to Wi-Fi
+2. If Wi-Fi connection fails, the WiFiManager will start. Connect to the "ATOM-SOCKET-" AP and access "192.168.4.1" in your browser to enter your Wi-Fi credentials
+3. Access the device's IP address shown in the serial monitor
+4. Web interface allows you to:
+   - Toggle power ON/OFF
+   - Check power consumption
+   - View device information
 
 ## OTA Update
 
-1. Access `http://[device_ip_address]/update` in a web browser.
-2. Enter the authentication credentials (default: username `admin`, password `admin`).
-3. Upload the new firmware (.bin file) generated by the Arduino IDE.
+1. Access `http://[device-ip-address]/update` in your browser
+2. Enter credentials (default: username `admin`, password `admin`)
+3. Upload the new firmware (.bin file) generated by Arduino IDE
 
-### Note on OTA Updates
+### OTA Update Notes
 
-- Please select the "Default" partition scheme.
+- Select "Default" for the partition scheme
 
 ## Troubleshooting
 
 ### If OTA Update Fails
-1. Ensure the partition scheme is set to "Default".
-2. Ensure a stable Wi-Fi connection.
 
-### If LINE Notifications Are Not Received
-1. Check if the access token is set correctly.
-2. Check the internet connection.
-3. Check if you have reached the LINE Messaging API limits.
+1. Verify the partition scheme is set to "Default"
+2. Ensure a stable Wi-Fi connection
+
+### If LINE Notifications Don't Arrive
+
+1. Verify the access token is correctly set
+2. Check your internet connection
+3. Verify you haven't reached the LINE Messaging API limit
+4. If long API keys aren't saving correctly, try restarting the device and reconfiguring
+
+### If LINE API Key Doesn't Save Correctly
+
+- Issue: Long LINE API keys (about 170 characters) don't save properly
+- Solution: Buffer size has been increased to 200 characters in the latest version
+  - Fixed in version 1.1.0 and later
+  - If using an older version, please update to the latest version
 
 ## License
 
@@ -122,6 +113,6 @@ This project is open source. See the LICENSE file for details.
 
 ## References
 
-- [M5Stack Official Website](https://m5stack.com/)
+- [M5Stack Official Site](https://m5stack.com/)
 - [LINE Messaging API](https://developers.line.biz/en/services/messaging-api/)
 - [Ambient](https://ambidata.io/)

@@ -3,21 +3,11 @@ M5Atom Socketを使用したスマートコンセントのプロジェクトで�
 
 ## 主な機能
 
-- **電源制御:**
-  - Web UIからの遠隔ON/OFF
-  - 本体ボタンでのON/OFF（短押し）
-- **電力モニタリング:**
-  - Web UIで電圧、電流、電力をリアルタイム表示
-- **通知機能:**
-  - 起動時にLINEへIPアドレスを通知
-  - 消費電力がしきい値を下回った際にLINEへ完了通知（3Dプリンタ等での利用を想定）
-- **WiFi設定機能:**
-  - 初回起動時に設定用のアクセスポイントを自動起動
-  - 本体ボタンの長押し（5秒以上）で、いつでもWiFi設定モードに移行可能
-- **データ送信:**
-  - Ambientへのデータ送信（オプション）
-- **ファームウェア更新:**
-  - OTA（Over-The-Air）によるWeb UIからのアップデート
+- Webインターフェースからの遠隔操作
+- リアルタイム電力消費モニタリング（電圧、電流、電力）
+- 消費電力が設定値を下回るとLINE Messaging APIにより完了を通知
+- Ambientへのデータ送信（オプション）
+- OTA（Over-The-Air）アップデート対応
 
 ## ハードウェア要件
 
@@ -39,61 +29,52 @@ M5Atom Socketを使用したスマートコンセントのプロジェクトで�
 ## インストール手順
 
 1. リポジトリをクローンするか、ソースコードをダウンロードします
-2. Arduino IDEで `M5Atom_Socket_LineMessagingAPI.ino` を開きます
+2. Arduino IDEで `M5Atom_Socket_LineAPI_Ambient.ino` を開きます
 3. 必要なライブラリをインストールします
 4. 設定をカスタマイズします（後述）
 5. M5Atomにスケッチをアップロードします
 
 ## 設定
 
+### APIキーの管理
+
+#### 確認方法
+
+1. ブラウザで `http://[デバイスのIPアドレス]/apikey` にアクセス
+2. 現在保存されているAPIキーが表示されます
+
+#### クリア方法
+
+1. ブラウザで `http://[デバイスのIPアドレス]/clearapikey` にアクセス
+2. デバイスが自動的に再起動します
+3. 再起動後、新しいAPIキーを設定してください
+
 ### 必須設定
 
-`M5Atom_Socket_LineMessagingAPI.ino` を開き、以下の設定を行ってください：
+`M5Atom_Socket_LineAPI_Ambient.ino` を開き、以下の設定を行ってください：
 
 ```cpp
 // デバイス名
-#define DEVICE_NAME "Fraxinus"  // 任意のデバイス名に変更可能
+#define DEVICE_NAME "M5Atom Socket"  // 任意のデバイス名に変更可能
 
-// LINE Messaging API アクセストークン
-const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // 実際のトークンに置き換え
+// LINE Notify アクセストークン
+const char* accessToken = "<YOUR_LINE_NOTIFY_TOKEN>";  // 実際のトークンに置き換え
 ```
 
 ### オプション設定
 
-- **Ambientへのデータ送信:**
-  - `M5Atom_Socket_LineMessagingAPI.ino` の先頭にある `//#define useAmb` のコメントを外して機能を有効にします。
-  - `channelId` と `writeKey` をご自身のものに設定してください。
-    ```cpp
-    #ifdef useAmb
-      #include <Ambient.h>
-      Ambient ambient;
-      unsigned int channelId = 40780; // ご自身のAmbientチャンネルID
-      const char* writeKey = "<YOUR_Ambient_WRITE_KEY>"; // ご自身のAmbientライトキー
-    #endif
-    ```
-- **デバッグモード:**
-  - `debug` の値を `true` または `false` に変更して、シリアルコンソールへのデバッグ出力の有効/無効を切り替えます。
+- Ambientを使用する場合は、`useAmb` のコメントを外し、チャンネルIDとライトキーを設定します
+- デバッグモードの有効/無効を切り替えるには `debug` を変更します
 
 ## 使用方法
 
-### 1. WiFi設定 (初回または変更時)
-- 電源を入れると、M5Atomは保存されたWiFi情報での接続を試みます。
-- 接続できない場合、または**本体ボタンを5秒以上長押し**した場合は、WiFi設定モードになります。
-- M5AtomのLEDが**青色**に点灯し、`ATOM-SOCKET-XXXX` という名前のアクセスポイントが起動します。
-- スマートフォンやPCでこのアクセスポイントに接続し、Webブラウザで `192.168.4.1` にアクセスすると、接続したいWiFiのSSIDとパスワードを設定できます。
-- 設定完了後、デバイスは自動的に再起動します。
-
-### 2. 通常利用
-- WiFi接続後、LINEに起動通知とIPアドレスが送信されます。
-- **本体ボタンを短く押す**と、ソケット電源のON/OFFが切り替わります。
-  - ON: 赤色LED
-  - OFF: 緑色LED
-- WebブラウザでデバイスのIPアドレスにアクセスすると、Web UIが表示されます。
-
-### 3. Web UIでの操作
-- 電源のON/OFF
-- 消費電力（電圧、電流、電力）のリアルタイム確認
-- OTA（無線）でのファームウェアアップデート
+1. 電源を入れると、M5AtomがWi-Fiに接続します
+2. WiFiに接続できない場合はWiFiManagerが立ち上がりますので、"ATOM-SOCKET-"で始まるAPに接続し、ブラウザで"192.168.4.1"にアクセスして接続するAPのSSIDとパスワードを入力します
+3. シリアルモニタに表示されるIPアドレスにWebブラウザでアクセスします
+4. Webインターフェースから以下の操作が可能です：
+   - 電源のON/OFF
+   - 消費電力の確認
+   - デバイス情報の表示
 
 ## OTAアップデート
 
@@ -108,13 +89,23 @@ const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // 
 ## トラブルシューティング
 
 ### OTAアップデートに失敗する場合
+
 1. パーティションスキームが「Default」に設定されていることを確認
 2. 安定したWi-Fi接続を確保
 
 ### LINE通知が届かない場合
+
 1. アクセストークンが正しく設定されているか確認
 2. インターネット接続を確認
 3. LINE Messaging APIの制限に達していないか確認
+4. 長いAPIキーが正しく保存されない場合、デバイスを再起動して再度設定を試してください
+
+### LINE APIキーが正しく保存されない場合
+
+- 問題: 長いLINE APIキー（約170文字）が正しく保存されない
+- 解決策: 最新バージョンではバッファサイズを200文字に拡張して対応
+  - バージョン1.1.0以降で修正済み
+  - 古いバージョンをご利用の場合は、最新版にアップデートしてください
 
 ## ライセンス
 
@@ -125,4 +116,3 @@ const char* accessToken = "<YOUR_LINE_MESSAGING_API_CHANNEL_ACCESS_TOKEN>";  // 
 - [M5Stack公式サイト](https://m5stack.com/)
 - [LINE Messaging API](https://developers.line.biz/ja/services/messaging-api/)
 - [Ambient](https://ambidata.io/)
-
