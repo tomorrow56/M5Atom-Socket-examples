@@ -2,7 +2,7 @@
 
 ### System
 
-![SYSTEM](img/system.PNG)
+![SYSTEM](img/SystemImage.png)
 
 ## M5Atom Socket with Line Messaging API Example
 The customized example for connectiong to Wi-Fi by using WiFi Manager and adding OTA Update function.
