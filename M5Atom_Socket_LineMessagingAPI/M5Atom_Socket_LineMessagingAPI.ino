@@ -80,10 +80,11 @@ float CurrentPre = 0;
 float CurrentTH = 0.3;
 
 /*
- * for Long press
-*/
+ * Button press timing
+ */
 unsigned long buttonPressStartTime = 0;
-const unsigned long longPressDuration = 5000; // 5 seconds
+const unsigned long shortPressDuration = 200;    // 200ms minimum for short press
+const unsigned long longPressDuration = 5000;    // 5 seconds for long press
 bool longPressTriggered = false;
 
 void handleRoot() {
@@ -323,10 +324,15 @@ void loop(){
   } else {
     // ボタンが離されている
     if (buttonPressStartTime > 0 && !longPressTriggered) {
-      // 短押しとして処理
-      RelayFlag = !RelayFlag;
-      Serial.print("Button: Power ");
-      Serial.println(RelayFlag ? "ON" : "OFF");
+      unsigned long pressDuration = millis() - buttonPressStartTime;
+      // 200ms以上押されていたら短押しとして処理
+      if (pressDuration >= shortPressDuration) {
+        RelayFlag = !RelayFlag;
+        Serial.print("Button: Power ");
+        Serial.println(RelayFlag ? "ON" : "OFF");
+      } else {
+        Serial.println("Button: Short press ignored (debounce)");
+      }
     }
     // 状態をリセット
     buttonPressStartTime = 0;
