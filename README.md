@@ -25,7 +25,7 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 <img src="img/line_message.jpg" width="320">
 
-### Power Trend using ambient
+### Power Trend using ambient(Optional)
 
 https://ambidata.io/
 
