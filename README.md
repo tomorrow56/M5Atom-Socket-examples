@@ -11,7 +11,11 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 ### Web UI
 
-<img src="img/WebUI.jpeg" width="320">
+<img src="img/WebUI.png" width="320">
+
+### Settings
+
+<img src="img/settings.png" width="320">
 
 ### OTA Update by Elagant OTA
 
