@@ -21,9 +21,9 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 <img src="img/OTA_update.png" width="320">
 
-### IP Address notification Message
+### IP Address and fihished Message
 
-<img src="img/LineMessage.jpg" width="320">
+<img src="img/line_message.jpg" width="320">
 
 ### Power Trend using ambient
 
