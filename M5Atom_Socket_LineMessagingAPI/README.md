@@ -26,7 +26,7 @@ A smart socket project using M5Atom Socket. Features power ON/OFF control, power
 - Required libraries:
   - M5Atom
   - ElegantOTA
-  - ESP32LineMessenger
+  - ESP32_LINE_Messaging_API
   - WiFiManager
   - WiFiClientSecure
   - Ambient (optional)

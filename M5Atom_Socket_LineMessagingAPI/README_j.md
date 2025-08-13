@@ -26,7 +26,7 @@ M5Atom Socketを使用したスマートコンセントのプロジェクトで�
 - 以下のライブラリ:
   - M5Atom
   - ElegantOTA
-  - ESP32LineMessenger
+  - ESP32_LINE_Messaging_API
   - WiFiManager
   - WiFiClientSecure
   - Ambient (オプション)
