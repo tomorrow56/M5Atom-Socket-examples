@@ -221,10 +221,12 @@ body {
 .device-info {
   position: absolute;
   top: 30px;
-  left: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 14px;
   color: #64b5f6;
   opacity: 0.7;
+  text-align: center;
 }
 
 .device-info #deviceName {
@@ -310,11 +312,19 @@ body {
   }
   
   .device-info {
-    position: relative;
-    top: auto;
-    left: auto;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100%;
     text-align: center;
-    margin-bottom: 20px;
+    margin: 20px 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  body {
+    padding-top: 0;
   }
 }
 </style>
@@ -372,6 +382,7 @@ body {
   
   <div class="ota-section">
     <button class="ota-button" onclick="navigateToOTA()">OTA Update</button>
+    <button class="ota-button" onclick="navigateToSettings()">Settings</button>
   </div>
 </div>
 
@@ -488,8 +499,16 @@ function navigateToOTA() {
   window.location.href = '/update';
 }
 
+function navigateToSettings() {
+  window.location.href = '/settings';
+}
+
 </script>
 </body>
 </html>
 )=====";
+
+// JavaScript関数をHTMLの<script>タグ内に移動する必要があります
+// この部分は削除し、HTMLの<script>セクション内に移動します
+
 

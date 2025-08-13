@@ -3,11 +3,16 @@ A smart socket project using M5Atom Socket. Features power ON/OFF control, power
 
 ## Key Features
 
-- Remote control via web interface
-- Real-time power consumption monitoring (voltage, current, power)
-- LINE Messaging API notifications when power consumption falls below set threshold
-- Data transmission to Ambient (optional)
-- OTA (Over-The-Air) update support
+- **Remote Control**: Web-based interface for power ON/OFF control
+- **Real-time Monitoring**: Voltage, current, power, and power factor measurement
+- **Smart Auto-OFF**: Configurable automatic power cutoff when consumption drops below threshold
+- **LINE Notifications**: Instant alerts via LINE Messaging API for power status changes
+- **Ambient Integration**: Optional cloud data logging with configurable channel settings
+- **Modern Web UI**: Responsive, mobile-friendly interface with real-time updates
+- **WiFi Management**: Built-in WiFiManager for easy network configuration
+- **OTA Updates**: Over-the-air firmware updates with web interface
+- **Persistent Settings**: NVS storage for configuration persistence
+- **Hardware Control**: Physical button control with LED status indicators
 
 ## Hardware Requirements
 
@@ -51,30 +56,44 @@ A smart socket project using M5Atom Socket. Features power ON/OFF control, power
 
 ### Required Settings
 
-Open `M5Atom_Socket_LineAPI_Ambient.ino` and configure the following settings:
+The device uses a web-based configuration system. Access the settings via the web interface:
 
-```cpp
-// Device name
-#define DEVICE_NAME "M5Atom Socket"  // Change to your preferred device name
+1. **Web Settings Interface**: Access `http://[device-ip]/settings` for configuration
+2. **LINE API Key Management**: Use `http://[device-ip]/apikey` to manage LINE access tokens
+3. **Device Configuration**: All settings are configurable via web interface:
+   - Device name customization
+   - Current threshold (default: 0.3A)
+   - Auto-off duration (default: 60 minutes)
+   - Ambient integration settings
+   - Auto-off feature enable/disable
 
-// LINE Notify Access Token
-const char* accessToken = "<YOUR_LINE_NOTIFY_TOKEN>";  // Replace with your actual token
-```
+### Advanced Configuration
 
-### Optional Settings
-
-- To use Ambient, uncomment `useAmb` and set your channel ID and write key
-- Toggle debug mode by modifying the `debug` variable
+- **Ambient Settings**: Enable/disable via web interface with channel ID and write key
+- **Debug Mode**: Configurable in source code (`#define debug true`)
+- **Power Thresholds**: Adjustable current threshold for auto-off functionality
+- **Timing Settings**: Customizable auto-off duration and monitoring intervals
 
 ## Usage
 
-1. Power on the M5Atom to connect to Wi-Fi
-2. If Wi-Fi connection fails, the WiFiManager will start. Connect to the "ATOM-SOCKET-" AP and access "192.168.4.1" in your browser to enter your Wi-Fi credentials
-3. Access the device's IP address shown in the serial monitor
-4. Web interface allows you to:
-   - Toggle power ON/OFF
-   - Check power consumption
-   - View device information
+### Initial Setup
+1. Power on the M5Atom Socket
+2. If Wi-Fi connection fails, WiFiManager creates an AP named "ATOM-SOCKET-[MAC]"
+3. Connect to the AP and access `192.168.4.1` to configure Wi-Fi credentials and enter LINE API Key
+4. Device will restart and connect to your Wi-Fi network
+5. LINE notification will be sent with the device's IP address
+
+### Web Interface Features
+- **Main Dashboard**: Real-time power monitoring with modern UI
+- **Power Control**: Toggle socket ON/OFF with immediate feedback
+- **Settings Page**: Comprehensive configuration interface
+- **API Key Management**: Secure LINE token configuration
+- **Status Monitoring**: Live voltage, current, power, and power factor display
+
+### Physical Controls
+- **Button Press**: Toggle power ON/OFF
+- **LED Indicators**: Visual status feedback
+- **Auto-OFF**: Automatic power cutoff when load drops below threshold
 
 ## OTA Update
 
