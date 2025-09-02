@@ -1,4 +1,5 @@
 #include "esp32web.h"
+#include "esp_chip_info.h"
 
 /********************************
 * for Wifi Connection

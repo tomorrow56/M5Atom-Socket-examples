@@ -297,7 +297,7 @@ const char settings_html[] = R"=====(
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-          window.location.href = "/"; // メインページに戻る
+          window.location.href = "/"; // Return to main page
         }
       };
       
@@ -313,14 +313,14 @@ const char settings_html[] = R"=====(
     }
 
     function cancelSettings() {
-      window.location.href = "/"; // メインページに戻る
+      window.location.href = "/"; // Return to main page
     }
 
     function navigateToApiKey() {
-      window.location.href = "/apikey"; // LINE API KEY確認ページに移動
+      window.location.href = "/apikey"; // Navigate to LINE API KEY confirmation page
     }
 
-    // イベントリスナーを追加
+    // Add event listeners
     document.addEventListener("DOMContentLoaded", function() {
       loadSettings();
       document.getElementById('ambientEnabled').addEventListener('change', updateAmbientInputs);

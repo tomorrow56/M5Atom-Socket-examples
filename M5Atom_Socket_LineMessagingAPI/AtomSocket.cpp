@@ -142,7 +142,7 @@ uint32_t ATOMSOCKET::GetPFAll()
 
 float ATOMSOCKET::GetKWh()
 {
-	float InspectingPower = GetInspectingPower(); //视在功率
+	float InspectingPower = GetInspectingPower(); // Apparent power
 	uint32_t PFcnt = (1/PowerPar) *(1/InspectingPower) * 1000000000 * 3600;
 	float KWh = (PFData * PF) / PFcnt;
 	return KWh;

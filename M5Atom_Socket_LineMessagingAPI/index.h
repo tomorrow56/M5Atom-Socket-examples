@@ -334,7 +334,7 @@ body {
 
 <div class="device-info">
   <div id="deviceName">%DEVICE_NAME%</div>
-  <div>IP: <span id="ipAddress">取得中...</span></div>
+  <div>IP: <span id="ipAddress">Loading...</span></div>
 </div>
 
 <div class="main-container">
@@ -474,7 +474,7 @@ function getData() {
   httpRequest.send();
 }
 
-// IPアドレスを取得して表示
+// Get and display IP address
 function getIPAddress() {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "/ip", true);
@@ -486,12 +486,12 @@ function getIPAddress() {
   xhr.send();
 }
 
-// 初期化
+// Initialization
 document.addEventListener('DOMContentLoaded', function() {
   getData();
   getIPAddress();
   
-  // 定期的にデータを更新（5秒間隔）
+  // Update data periodically (5 second intervals)
   setInterval(getData, 5000);
 });
 
@@ -508,7 +508,7 @@ function navigateToSettings() {
 </html>
 )=====";
 
-// JavaScript関数をHTMLの<script>タグ内に移動する必要があります
-// この部分は削除し、HTMLの<script>セクション内に移動します
+// JavaScript functions need to be moved inside HTML <script> tags
+// This section should be deleted and moved to the HTML <script> section
 
 

@@ -1,16 +1,18 @@
 /*
- * M5ATOM Socket Power Monitor example 
- * Copyright (c) 2025 @tomorrow56 All rights reserved.
- *  https://x.com/tomorrow56
- *  MIT License
- * Main Function:
- *  - Monitor socket power with ATOM Socket.
- *  - Toggle power on/off using the middle button.
- *  - Connect to Wi-Fi and send the device's IP address to the LINE Message.
- *  - Refer to README.md for details.
+ * M5Atom Socket LINE Messaging API Controller
+ * 
+ * Copyright (c) 2025 @tomorrow56. All rights reserved.
+ * 
+ * Description: Use ATOM Socket to monitor the socket power, press the middle button of ATOM to switch the socket power on and off.
+ * Connect to Wi-Fi router and access IP address to wirelessly control the socket power and view the power voltage, current and power information.
+ * Send IP address of device to LINE Messaging API.
+ * Please see README.md for reference.
+ * 
+ * Version: 11.0
  */
 
-#include <ElegantOTA.h>
+
+#include <ESP32FwUploader.h>
 #include "M5Atom.h"
 #include "AtomSocket.h"
 #include "esp32web.h"
@@ -26,8 +28,8 @@ Preferences preferences;
 /*
  * Device configuration
 */
-char DEVICE_NAME[32]; // デバイス名を設定
-// デバッグモード設定
+char DEVICE_NAME[32]; // Set device name
+// Debug mode setting
 #define debug true
 
 /*
@@ -36,7 +38,7 @@ char DEVICE_NAME[32]; // デバイス名を設定
 #include <Ambient.h>
 Ambient ambient;
 
-uint16_t SendInterval = 1 * 60 * 1000; // メッセージ送信判定の間隔(60秒)
+uint16_t SendInterval = 1 * 60 * 1000;
 uint32_t updateSendTime = 0; // time for next update
 
 /*
@@ -53,15 +55,15 @@ IPAddress ipadr;
 /*
  * Line Messaging setting
  */
-// LINEチャネルアクセストークンは以下から取得する
+// Get LINE channel access token from the following URL
 // https://developers.line.biz/ja/
-// LINEチャネルアクセストークン (デフォルト値)
-const char* accessToken = "<your access token>";
+// LINE channel access token (default value)
+const char* accessToken = "<Your Access Token>";
 
-// NVSから読み込んだAPIキーを格納するグローバル変数
+// Global variable to store API key loaded from NVS
 String storedApiKey;
 
-// ライブラリインスタンス作成
+// Create library instance
 ESP32LineMessenger line;
 
 int Voltage, ActivePower = 0;
@@ -73,7 +75,7 @@ float Current = 0;
 #define RXD 22
 #define RELAY 23
 
-// シリアル通信用
+// For serial communication
 HardwareSerial AtomSerial(1);
 
 ATOMSOCKET ATOM;
@@ -87,16 +89,16 @@ uint32_t updateTime = 0; // time for next update
 float CurrentPre = 0;
 float CurrentTH = 0.3;
 
-// 追加する変数
-uint32_t currentLowStartTime = 0; // 電流が閾値以下になった時刻
-bool powerOffScheduled = false; // 電源オフがスケジュールされたか
-uint16_t PowerOffDuration = 60; // 電源オフまでの時間（分単位、デフォルト60分）
+// Additional variables
+uint32_t currentLowStartTime = 0; // Time when current fell below threshold
+bool powerOffScheduled = false; // Whether power off is scheduled
+uint16_t PowerOffDuration = 60; // Time until power off (in minutes, default 60 minutes)
 
-// Ambient設定変数
+// Ambient configuration variables
 bool ambientEnabled = false;
 unsigned int ambientChannelId = 0;
 char ambientWriteKey[33] = "";
-bool autoOffEnabled = true; // Auto OFF機能の有効/無効設定（デフォルトは有効）
+bool autoOffEnabled = true; // Auto OFF function enable/disable setting (default is enabled)
 
 /*
  * Button press timing
@@ -125,60 +127,26 @@ String DataCreate() {
 
 unsigned long ota_progress_millis = 0;
 
-void onOTAStart() {
-  // OTA開始時にシリアルにログを出力
-  Serial.println("OTA update started!");
-  // リレーをオフにして安全を確保
-  RelayFlag = false;
-  // シリアル通信をフラッシュして、すべての出力を確実に送信
-  Serial.flush();
-}
-
-void onOTAProgress(size_t current, size_t final) {
-  // Log every 1 second
-  if (millis() - ota_progress_millis > 1000) {
-    ota_progress_millis = millis();
-    Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
-  }
-}
-
-void onOTAEnd(bool success) {
-  // OTA終了時にシリアルにログを出力
-  if (success) {
-    Serial.println("OTA update finished successfully!");
-    // 成功時は3秒後にリセット
-    delay(3000);
-    ESP.restart();
-  } else {
-    Serial.println("There was an error during OTA update!");
-    // 失敗時はリレー状態を元に戻す
-    RelayFlag = true;  // または適切な初期状態に
-  }
-  
-  // シリアル通信をフラッシュ
-  Serial.flush();
-}
-
 void setup(){
   //M5::begin(SerialEnable = true, I2CEnable = true, DisplayEnable = false);
   M5.begin(true, false, true);
   M5.dis.drawpix(0, 0xe0ffff);
   ATOM.Init(AtomSerial, RELAY, RXD);
 
-  // 設定値を読み込む
-  loadSettings(); // NVSから設定値を読み込む
-  loadDeviceSettings(); // DEVICE_NAMEをNVSから読み込む
-  loadAmbientSettings(); // Ambient設定をNVSから読み込む
-  storedApiKey = loadLineApiKey(); // LINE Access tokenをNVSから読み込む
+  // Load configuration values
+  loadSettings(); // Load settings from NVS
+  loadDeviceSettings(); // Load DEVICE_NAME from NVS
+  loadAmbientSettings(); // Load Ambient settings from NVS
+  storedApiKey = loadLineApiKey(); // Load LINE Access token from NVS
 
-  // アクセストークン設定
+  // Set access token
   if (storedApiKey.length() > 0){
     line.setAccessToken(storedApiKey.c_str());
   } else {
     line.setAccessToken(accessToken);
   }
   
-  // デバッグモード設定
+  // Set debug mode
   line.setDebug(debug);
 
   // Wifi and OTA setup
@@ -197,9 +165,9 @@ void setup(){
   line.sendMessage(message.c_str());
   delay(1000);
 
-  // Webサーバーのエンドポイント設定
+  // Web server endpoint configuration
   server.on("/", handleRoot);
-  server.on("/ip", handleIP);  // IPアドレス取得用エンドポイント
+  server.on("/ip", handleIP);  // Endpoint for getting IP address
   server.on("/on", []() {
     RelayFlag = true;
     Serial.println("Web: Power ON");
@@ -215,29 +183,47 @@ void setup(){
   });
   server.on("/apikey", handleApiKey);
   server.on("/clearapikey", handleClearApiKey);
-  server.on("/settings", handleSettings); // Settingページ
-  server.on("/savesettings", HTTP_POST, handleSaveSettings); // Setting保存
-  server.on("/getsettings", handleGetSettings); // Setting取得
+  server.on("/settings", handleSettings); // Settings page
+  server.on("/savesettings", HTTP_POST, handleSaveSettings); // Save settings
+  server.on("/getsettings", handleGetSettings); // Get settings
   
-  // CORS対応
+  // CORS support
   server.enableCORS(true);
   
   server.begin();
   Serial.println("HTTP server started");
   
-  // ElegantOTAの設定
-  ElegantOTA.setAuth("admin", "admin");  // ユーザー名とパスワードを設定
+   // Prioritize OTA before other initialization processes
+  ESP32FwUploader.begin(&server);
+  ESP32FwUploader.setDebug(true);
+  ESP32FwUploader.setDarkMode(true);  // Enable dark mode
+  ESP32FwUploader.onStart([]() {
+    Serial.println("OTA update started!");
+    RelayFlag = false;
+    Serial.flush();
+  });
+
+  ESP32FwUploader.onProgress([](size_t current, size_t total) {
+    Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, total);
+  });
+
+  ESP32FwUploader.onEnd([](bool success) {
+    if (success) {
+      Serial.println("OTA update finished successfully!");
+      delay(3000);
+      ESP.restart();
+    } else {
+      Serial.println("There was an error during OTA update!");
+      RelayFlag = true;
+    }
+    Serial.flush();
+  });
   
-  // デバッグ用コールバックを設定
-  ElegantOTA.onStart(onOTAStart);
-  ElegantOTA.onProgress(onOTAProgress);
-  ElegantOTA.onEnd(onOTAEnd);
+  ESP32FwUploader.onError([](ESP32Fw_Error error, const String& message) {
+    Serial.printf("OTA Error: %d, Message: %s\n", error, message.c_str());
+  });
   
-  // ElegantOTAを開始
-  ElegantOTA.begin(&server);
-  
-  // その他の初期化処理の前にOTAを優先
-  delay(1000);  // 安定化のための遅延
+  delay(1000);  // Delay for stabilization
 
   // Ambient initialization
   if (ambientEnabled && ambientChannelId > 0 && strlen(ambientWriteKey) > 0) {
@@ -292,7 +278,7 @@ void loop(){
         String message = "[" + String(DEVICE_NAME) + "] The work is finished.";
         if (autoOffEnabled) {
           message += "\r\n Auto OFF in " + String(PowerOffDuration) + "min.";
-          currentLowStartTime = millis(); // 電流が閾値以下になった時刻を記録
+          currentLowStartTime = millis(); // Record time when current fell below threshold
           powerOffScheduled = true; // Auto OFF Schedule
         } else {
           message += "\r\n Auto OFF disabled.";
@@ -327,28 +313,29 @@ void loop(){
       }else{
         Serial.println("LINE send result: FAILED");
       }
-    } else if (powerOffScheduled && Current >= CurrentTH) {
-      // Cancel Power OFF Schedule
-      powerOffScheduled = false;
-      Serial.println("Power off schedule cancelled: Current exceeded threshold.");
-    }
+    } 
+  } else if (autoOffEnabled && powerOffScheduled && Current >= CurrentTH) {
+    // If current exceeds threshold, cancel power off schedule and reset counter
+    powerOffScheduled = false;
+    currentLowStartTime = 0; // Reset counter
+    Serial.println("Power off schedule cancelled: Current exceeded threshold. Counter reset.");
   }
 
-  // 物理ボタンでのON/OFF制御
+  // Physical button ON/OFF control
   if (M5.Btn.isPressed()) {
-    // ボタンが押された
+    // Button is pressed
     if (buttonPressStartTime == 0) {
-      // ボタンが押された時間を記録
+      // Record button press time
       buttonPressStartTime = millis();
       longPressTriggered = false;
     } else if (millis() - buttonPressStartTime > longPressDuration) {
       if (!longPressTriggered) {
-      // longPressDuration(5秒)以上押されていたら長押しとしてAPモードに以降
+      // If pressed for longPressDuration (5 seconds) or more, treat as long press and switch to AP mode
         longPressTriggered = true;
         Serial.println("Long press detected. Starting WiFi Manager AP.");
-        M5.dis.drawpix(0, 0x0000ff); // 青色でAPモード中を表示
+        M5.dis.drawpix(0, 0x0000ff); // Display AP mode in blue
 
-        // メインのWebサーバーを停止してポートの競合を防ぐ
+        // Stop main web server to prevent port conflicts
         server.stop();
 
         WiFiManager wifiManager;
@@ -356,7 +343,7 @@ void loop(){
         WiFiManagerParameter custom_line_api_key("lineapikey", "LINE Messaging API Key", "", 200);
         wifiManager.addParameter(&custom_line_api_key);
         wifiManager.setDebugOutput(true);
-        wifiManager.setConfigPortalTimeout(180); // 3分でタイムアウト
+        wifiManager.setConfigPortalTimeout(180); // 3 minute timeout
 
         if (wifiManager.startConfigPortal(WiFiAPname)) {
           Serial.println("WiFi settings configured successfully.");
@@ -379,13 +366,13 @@ void loop(){
       }
     }
   } else {
-    // ボタンが押されていない
+    // Button is not pressed
     if (buttonPressStartTime > 0 && !longPressTriggered) {
       unsigned long pressDuration = millis() - buttonPressStartTime;
-      // shortPressDuration(200ms)以上押されていたら短押しとして処理
+      // If pressed for shortPressDuration (200ms) or more, treat as short press
       if (pressDuration >= shortPressDuration) {
         RelayFlag = !RelayFlag;
-        // ボタンでRelayFlagが変更された場合、電源オフスケジュールをリセット
+        // If RelayFlag is changed by button, reset power off schedule
         powerOffScheduled = false;
         Serial.print("Button: Power ");
         Serial.println(RelayFlag ? "ON" : "OFF");
@@ -393,22 +380,23 @@ void loop(){
         Serial.println("Button: Short press ignored (debounce)");
       }
     }
-    // 状態をリセット
+    // Reset state
     buttonPressStartTime = 0;
   }
 
-  // リレー制御とLED表示
+  // Relay control and LED display
   if(RelayFlag) {
-    M5.dis.drawpix(0, 0xff0000);  // 赤色でON状態を表示
+    M5.dis.drawpix(0, 0xff0000);  // Display ON state in red
     ATOM.SetPowerOn();
   }else{
     ATOM.SetPowerOff();
-    M5.dis.drawpix(0, 0x00ff00);  // 緑色でOFF状態を表示
+    M5.dis.drawpix(0, 0x00ff00);  // Display OFF state in green
   }
   
   M5.update();
   server.handleClient();
-  ElegantOTA.loop();
+  ESP32FwUploader.loop();
+
 }
 
 /*** LINE API Key management***/
@@ -453,7 +441,7 @@ void handleClearApiKey() {
   ESP.restart();
 }
 
-/*** NVSに設定値を保存 ***/
+/*** Save settings to NVS ***/
 void saveSettings(float currentTH, uint16_t powerOffDuration, bool autoOffEnabled) {
   preferences.begin("atom-socket", false);
   preferences.putFloat("current_th", currentTH);
@@ -463,12 +451,12 @@ void saveSettings(float currentTH, uint16_t powerOffDuration, bool autoOffEnable
   Serial.println("Settings saved to NVS.");
 }
 
-/*** NVSから設定値をロード ***/
+/*** Load settings from NVS ***/
 void loadSettings() {
   preferences.begin("atom-socket", false);
-  CurrentTH = preferences.getFloat("current_th", 0.3); // デフォルト値は0.3
-  PowerOffDuration = preferences.getUShort("power_off_dur", 60); // デフォルト値は60
-  autoOffEnabled = preferences.getBool("auto_off_en", true); // デフォルト値はtrue
+  CurrentTH = preferences.getFloat("current_th", 0.3); // Default value is 0.3
+  PowerOffDuration = preferences.getUShort("power_off_dur", 60); // Default value is 60
+  autoOffEnabled = preferences.getBool("auto_off_en", true); // Default value is true
   preferences.end();
   Serial.println("Settings loaded from NVS.");
   Serial.print("Loaded CurrentTH: "); Serial.println(CurrentTH);
@@ -476,12 +464,12 @@ void loadSettings() {
   Serial.print("Loaded AutoOffEnabled: "); Serial.println(autoOffEnabled ? "true" : "false");
 }
 
-// Settingページ表示用ハンドラ
+// Handler for displaying Settings page
 void handleSettings() {
   server.send(200, "text/html", settings_html);
 }
 
-// // Setting値保存用ハンドラ
+// Handler for saving setting values
 void handleSaveSettings() {
   if (server.hasArg("deviceName") && server.hasArg("currentTH") && server.hasArg("powerOffDuration") && 
       server.hasArg("autoOffEnabled") && server.hasArg("ambientEnabled") && server.hasArg("ambientChannelId") && server.hasArg("ambientWriteKey")) {
@@ -494,12 +482,12 @@ void handleSaveSettings() {
     unsigned int newAmbientChannelId = server.arg("ambientChannelId").toInt();
     String newAmbientWriteKey = server.arg("ambientWriteKey");
     
-    // 設定を保存
+    // Save settings
     saveSettings(newCurrentTH, newPowerOffDuration, newAutoOffEnabled);
     saveDeviceName(newDeviceName.c_str());
     saveAmbientSettings(newAmbientEnabled, newAmbientChannelId, newAmbientWriteKey.c_str());
     
-    // グローバル変数を更新
+    // Update global variables
     newDeviceName.toCharArray(DEVICE_NAME, sizeof(DEVICE_NAME));
     CurrentTH = newCurrentTH;
     PowerOffDuration = newPowerOffDuration;
@@ -514,7 +502,7 @@ void handleSaveSettings() {
   }
 }
 
-// Setting値取得用ハンドラ
+// Handler for getting setting values
 void handleGetSettings() {
   String json = "{\"deviceName\":\"" + String(DEVICE_NAME) + 
                 "\", \"currentTH\":" + String(CurrentTH) + 
@@ -526,7 +514,7 @@ void handleGetSettings() {
   server.send(200, "application/json", json);
 }
 
-// NVSにDEVICE_NAMEを保存する関数
+// Function to save DEVICE_NAME to NVS
 void saveDeviceName(const char* deviceName) {
   preferences.begin("atom-socket", false);
   preferences.putString("device_name", deviceName);
@@ -534,16 +522,16 @@ void saveDeviceName(const char* deviceName) {
   Serial.println("DEVICE_NAME saved to NVS.");
 }
 
-// NVSからDEVICE_NAMEを読み込む関数
+// Function to load DEVICE_NAME from NVS
 void loadDeviceSettings() {
   preferences.begin("atom-socket", false);
-  String loadedName = preferences.getString("device_name", "M5Atom Socket"); // デフォルト値は"M5Atom Socket"
+  String loadedName = preferences.getString("device_name", "M5Atom Socket"); // Default value is "M5Atom Socket"
   loadedName.toCharArray(DEVICE_NAME, sizeof(DEVICE_NAME));
   preferences.end();
   Serial.print("Loaded DEVICE_NAME: "); Serial.println(DEVICE_NAME);
 }
 
-// NVSにAmbient設定を保存する関数
+// Function to save Ambient settings to NVS
 void saveAmbientSettings(bool enabled, unsigned int channelId, const char* writeKey) {
   preferences.begin("atom-socket", false);
   preferences.putBool("ambient_en", enabled);
@@ -553,11 +541,11 @@ void saveAmbientSettings(bool enabled, unsigned int channelId, const char* write
   Serial.println("Ambient settings saved to NVS.");
 }
 
-// NVSからAmbient設定を読み込む関数
+// Function to load Ambient settings from NVS
 void loadAmbientSettings() {
   preferences.begin("atom-socket", false);
-  ambientEnabled = preferences.getBool("ambient_en", false); // デフォルトは無効
-  ambientChannelId = preferences.getUInt("ambient_ch", 0); // デフォルトは0
+  ambientEnabled = preferences.getBool("ambient_en", false); // Default is disabled
+  ambientChannelId = preferences.getUInt("ambient_ch", 0); // Default is 0
   String loadedKey = preferences.getString("ambient_key", "");
   loadedKey.toCharArray(ambientWriteKey, sizeof(ambientWriteKey));
   preferences.end();
