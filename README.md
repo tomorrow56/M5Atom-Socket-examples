@@ -17,7 +17,7 @@ The customized example for connectiong to Wi-Fi by using WiFi Manager and adding
 
 <img src="img/settings.png" width="320">
 
-### OTA Update by Elagant OTA
+### OTA Update
 
 <img src="img/OTA_update.png" width="320">
 
